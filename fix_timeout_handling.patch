@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: salah eddine louffidi <salahlouffidi@gmail.com>
+Date: Thu, 21 Apr 2024 00:00:00 +0000
+Subject: [PATCH] Fix timeout handling in request_handling.c
+
+---
+ request_handling.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/request_handling.c b/request_handling.c
+index 1234567..abcdefg 100644
+--- a/request_handling.c
++++ b/request_handling.c
+@@ -100,7 +100,16 @@ int handle_request(Request *req) {
+     if (read_request_body(req) != SUCCESS) {
+         log_error("Failed to read request body");
+-        send_response(req->client_sock, "408 Request Timeout");
++        if (errno == ETIMEDOUT) {
++            send_response(req->client_sock, "408 Request Timeout");
++        } else {
++            send_response(req->client_sock, "500 Internal Server Error");
++        }
++        return ERROR;
++    }
++
++    // Process the request body...
++
++    return SUCCESS;
+ }
+--
+2.31.1
+
